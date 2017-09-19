@@ -2,6 +2,7 @@ import numpy as np
 from numpy.matlib import repmat
 from scipy.optimize import minimize
 
+
 def NegativeLogLikelihood(theta, SampleFeature, SampleControl):
     numAction = SampleFeature.shape[1]
     numFea = SampleFeature.shape[2]
@@ -33,6 +34,7 @@ def GradientNegativeLogLikelihood(theta, SampleFeature, SampleControl):
         DNLL[0:numFea] = DNLL[0:numFea] + np.dot(leftm, rightm)
     return (DNLL / (numSample + 0.0))
 
+
 def GradientNegativeLogLikelihoodUnc(theta, SampleFeature, SampleControl):
     numAction = SampleFeature.shape[1]
     numFea = SampleFeature.shape[2]
@@ -50,9 +52,10 @@ def GradientNegativeLogLikelihoodUnc(theta, SampleFeature, SampleControl):
         DNLL = DNLL + np.dot(leftm, rightm)
     return (DNLL / (numSample + 0.0))
 
-def LogsticRegressionWithConstrain(FeaturesTrain,ControlTrain,FeaturesCV,ControlCV,PossibleC,showInfo=True):
+
+def logstic_regression_with_constrain(features_train, control_train, FeaturesCV, ControlCV, PossibleC, showInfo=True):
     # Generate matrices for linear constrants
-    numFea = FeaturesTrain.shape[2]
+    numFea = features_train.shape[2]
     G = np.zeros((2 * numFea + 1, 2 * numFea))
     h = np.zeros(2 * numFea + 1)
     h[2 * numFea] = 1
@@ -73,8 +76,8 @@ def LogsticRegressionWithConstrain(FeaturesTrain,ControlTrain,FeaturesCV,Control
     thisTheta = np.ones((2 * numFea, 1))
     for i in range(len(PossibleC)):
         C = PossibleC[i]
-        TrainObjectFun = lambda theta: NegativeLogLikelihood(theta, FeaturesTrain, ControlTrain)
-        TrainObjectFunGrad = lambda theta: GradientNegativeLogLikelihood(theta, FeaturesTrain, ControlTrain)
+        TrainObjectFun = lambda theta: NegativeLogLikelihood(theta, features_train, control_train)
+        TrainObjectFunGrad = lambda theta: GradientNegativeLogLikelihood(theta, features_train, control_train)
 
         cons = ({'type': 'ineq', 'fun': lambda x: -(np.dot(G, x) - C * h)})
         thisTheta = minimize(TrainObjectFun, thisTheta.copy(), jac=TrainObjectFunGrad, constraints=cons,
@@ -99,16 +102,17 @@ def LogsticRegressionWithConstrain(FeaturesTrain,ControlTrain,FeaturesCV,Control
         print('')
     return bestTheta
 
-def LogsticRegressionWithoutConstrain(FeaturesTrain,ControlTrain,C):
+
+def LogsticRegressionWithoutConstrain(FeaturesTrain, ControlTrain, C):
     numFea = FeaturesTrain.shape[2]
     G = np.zeros((2 * numFea, numFea))
     h = np.zeros(2 * numFea)
 
     for i in range(numFea):
-        G[i,i] = 1
+        G[i, i] = 1
         h[i] = -1
-        G[i+numFea,i] = -1
-        h[i+numFea] = -1
+        G[i + numFea, i] = -1
+        h[i + numFea] = -1
 
     cons = ({'type': 'ineq', 'fun': lambda x: (np.dot(G, x) - C * h)})
 

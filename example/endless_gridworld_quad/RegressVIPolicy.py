@@ -1,16 +1,18 @@
 # This script is aim to regressed the policy generate by VI using a parametric model
 import sys
+
 sys.path.append('../../')
 import scipy.io
 import irl as IRL
 import numpy as np
-np.set_printoptions(precision=2,suppress=True)
+
+np.set_printoptions(precision=2, suppress=True)
 from numpy.matlib import repmat
 
 
-def CalculateRSPAverageReward(theta,Features,TransProb,RewardsVector):
+def calculate_rsp_average_reward(theta, Features, TransProb, RewardsVector):
     # Calculate the probability that agent take action
-    numState  = TransProb.shape[0]
+    numState = TransProb.shape[0]
     numAction = TransProb.shape[2]
     StateActionProb = np.dot(Features, theta)
     StateActionProb = np.exp(StateActionProb)
@@ -29,17 +31,18 @@ def CalculateRSPAverageReward(theta,Features,TransProb,RewardsVector):
 
     vecs /= np.sum(vecs)
     allreward = np.dot(vecs.T, RewardsVector)
-    return allreward[0,0]
+    return allreward[0, 0]
 
-def CalculateAverageReward(ActionDataSample,TransProb,RewardsVector):
+
+def calculate_average_reward(ActionDataSample, TransProb, RewardsVector):
     # Calculate the probability that agent take action
-    numState  = TransProb.shape[0]
+    numState = TransProb.shape[0]
 
     TranProbUnderAction = np.zeros((numState, numState))
     for i in range(numState):
         stateid = ActionDataSample[i, 0]
         action = ActionDataSample[i, 1]
-        TranProbUnderAction[:,stateid] = TransProb[:,stateid,action]
+        TranProbUnderAction[:, stateid] = TransProb[:, stateid, action]
 
     vecs = np.ones((numState, 1))
     vecs /= numState
@@ -48,33 +51,34 @@ def CalculateAverageReward(ActionDataSample,TransProb,RewardsVector):
 
     vecs /= np.sum(vecs)
     allreward = np.dot(vecs.T, RewardsVector)
-    return allreward[0,0]
+    return allreward[0, 0]
 
 
 if __name__ == '__main__':
     # Prepare the enviromnent
     from EnvSetting import *
-    LoadedData = scipy.io.loadmat('../../data/EndLessGridWorldQuad/SampleFromVI.mat')
-    VIDataSample = LoadedData['VIDataSample']
-    TransProb = LoadedData["TransProb"]
-    Features = LoadedData["Features"]
-    RewardsVector = LoadedData["RewardsVector"]
-    GreedyDataSample = LoadedData['GreedyDataSample']
+
+    loaded_data = scipy.io.loadmat('../../data/EndLessGridWorldQuad/SampleFromVI.mat')
+    vi_data_sample = loaded_data['VIDataSample']
+    TransProb = loaded_data["TransProb"]
+    Features = loaded_data["Features"]
+    RewardsVector = loaded_data["RewardsVector"]
+    GreedyDataSample = loaded_data['GreedyDataSample']
 
     # Transform to Feature space
-    FeaturesSample = np.zeros((numState, 4, numFea))
-    ActionSample   = np.zeros((1,numState))
-    for i in range(numState):
-        stateid = VIDataSample[i,0]
-        x,y = ind2sub(stateid)
-        action = VIDataSample[i,1]
-        ActionSample[0,i] = action
+    FeaturesSample = np.zeros((num_state, 4, num_feature))
+    ActionSample = np.zeros((1, num_state))
+    for i in range(num_state):
+        stateid = vi_data_sample[i, 0]
+        x, y = ind2sub(stateid)
+        action = vi_data_sample[i, 1]
+        ActionSample[0, i] = action
         for u in range(4):
-            featureitem = Features[stateid,u,:]
+            featureitem = Features[stateid, u, :]
             FeaturesSample[i][u][:] = featureitem
 
-    VIReward =  CalculateAverageReward(VIDataSample, TransProb, RewardsVector)
-    Greedy   =  CalculateAverageReward(GreedyDataSample, TransProb, RewardsVector)
+    VIReward = calculate_average_reward(vi_data_sample, TransProb, RewardsVector)
+    Greedy = calculate_average_reward(GreedyDataSample, TransProb, RewardsVector)
 
     print(VIReward)
     print(Greedy)
@@ -84,55 +88,54 @@ if __name__ == '__main__':
     lenRate = len(PossibleSampleRatio)
     RewardvsRate = np.zeros(lenRate)
     UncRewardvsRate = np.zeros(lenRate)
-    Trails = 100
+    Trails = 10
 
     bestReward = -1000
     bestTheta = None
 
-    ConReward = np.zeros((lenRate,Trails))
-    UncReward = np.zeros((lenRate,Trails))
+    ConReward = np.zeros((lenRate, Trails))
+    UncReward = np.zeros((lenRate, Trails))
 
     for trailID in range(Trails):
-        ind = np.arange(numState, dtype=int)
+        ind = np.arange(num_state, dtype=int)
         np.random.shuffle(ind)
         ThisFeaturesSample = FeaturesSample[ind, :, :]
         ThisActionSample = ActionSample[0, ind]
         for rateID in range(lenRate):
             SampleRatio = PossibleSampleRatio[rateID]
-            numTry = np.ceil(numState * SampleRatio)
+            numTry = np.ceil(num_state * SampleRatio)
             numTry = int(numTry)
-            numTrain = numTry-20
+            numTrain = numTry - 20
             TrainFeaturesSample = ThisFeaturesSample[0:numTrain, :, :]
             TrainActionSample = ThisActionSample[0:numTrain]
             CVFeaturesSample = ThisFeaturesSample[numTrain:numTry, :, :]
             CVActionSample = ThisActionSample[numTrain:numTry]
-            thisTheta = IRL.LogsticRegressionWithConstrain(TrainFeaturesSample, TrainActionSample, CVFeaturesSample,
-                                                   CVActionSample, PossibleC, showInfo=False)
+            thisTheta = IRL.logstic_regression_with_constrain(TrainFeaturesSample, TrainActionSample, CVFeaturesSample,
+                                                              CVActionSample, PossibleC, showInfo=False)
 
-            thisReward = CalculateRSPAverageReward(thisTheta, Features, TransProb, RewardsVector)
-            print("\r", trailID, rateID, thisReward,end='',flush=True)
+            thisReward = calculate_rsp_average_reward(thisTheta, Features, TransProb, RewardsVector)
+            print("\r", trailID, rateID, thisReward, end='', flush=True)
             if thisReward > bestReward:
                 bestReward = thisReward
                 bestTheta = thisTheta.copy()
             ConReward[rateID, trailID] = thisReward
             RewardvsRate[rateID] += thisReward
 
-            thisTheta = IRL.LogsticRegressionWithoutConstrain(TrainFeaturesSample, TrainActionSample, 5)
-            thisReward = CalculateRSPAverageReward(thisTheta, Features, TransProb, RewardsVector)
+            thisTheta = IRL.LogsticRegressionWithoutConstrain(TrainFeaturesSample, TrainActionSample, 3)
+            thisReward = calculate_rsp_average_reward(thisTheta, Features, TransProb, RewardsVector)
             if thisReward > bestReward:
                 bestReward = thisReward
                 bestTheta = thisTheta.copy()
             UncReward[rateID, trailID] = thisReward
             UncRewardvsRate[rateID] += thisReward
 
-
-    RewardvsRate/=Trails
+    RewardvsRate /= Trails
     print(RewardvsRate)
 
     filename = '../../data/EndLessGridWorldQuad/RegressResult2.mat'
-    scipy.io.savemat(filename, {"bestTheta":bestTheta,
-                                "VIReward":VIReward,
-                                "Greedy":Greedy,
-                                "PossibleSampleRatio":PossibleSampleRatio,
-                                "ConReward":ConReward,
-                                "UncReward":UncReward})
+    scipy.io.savemat(filename, {"bestTheta": bestTheta,
+                                "VIReward": VIReward,
+                                "Greedy": Greedy,
+                                "PossibleSampleRatio": PossibleSampleRatio,
+                                "ConReward": ConReward,
+                                "UncReward": UncReward})
