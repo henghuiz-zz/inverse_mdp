@@ -11,12 +11,11 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
+from __future__ import print_function
 import collections as util
-from .learningAgents import ValueEstimationAgent
 
 
-class ValueIterationAgent(ValueEstimationAgent):
+class ValueIterationAgent:
     """
         * Please read learningAgents.py before reading this.*
 
@@ -25,54 +24,58 @@ class ValueIterationAgent(ValueEstimationAgent):
         for a given number of iterations using the supplied
         discount factor.
     """
-    def __init__(self, mdp, discount = 0.9, iterations = 10000):
+
+    def __init__(self, mdp, discount=0.9, iterations=1000):
         """
           Your value iteration agent should take an mdp on
           construction, run the indicated number of iterations
           and then act according to the resulting policy.
-
-          Some useful mdp methods you will use:
-              mdp.getStates()
-              mdp.getPossibleActions(state)
-              mdp.getTransitionStatesAndProbs(state, action)
-              mdp.getReward(state, action, nextState)
-              mdp.isTerminal(state)
         """
         self.mdp = mdp
         self.discount = discount
         self.iterations = iterations
-        self.values = util.Counter() # A Counter is a dict with default 0
+        self.values = util.Counter()  # A Counter is a dict with default 0
 
-        # Write value iteration code here
+        # Value iteration
         for i in range(iterations):
-            tmpV = util.Counter()
-            for state in self.mdp.getStates():
+            value_instance = util.Counter()
+            for state in self.mdp.get_states():
                 v = []
-                for action in self.mdp.getPossibleActions(state):
-                    v.append(self.computeQValueFromValues(state,action))
+                for action in self.mdp.get_possible_actions(state):
+                    v.append(self.compute_q_value_from_values(state, action))
                 if v:
-                    tmpV[state]=max(v)
-            self.values=tmpV
+                    value_instance[state] = max(v)
+            self.values = value_instance
             if iterations > 100:
-                print("\r Iteration:",i,end='',flush=True)
+                print("\r Iteration:", i, end='', flush=True)
 
-    def getValue(self, state):
+    def get_value(self, state):
         """
           Return the value of the state (computed in __init__).
         """
         return self.values[state]
 
+    def get_policy(self, state):
+        return self.compute_action_from_values(state)
 
-    def computeQValueFromValues(self, state, action):
+    def get_action(self, state):
+        "Returns the policy at the state (no exploration)."
+        return self.compute_action_from_values(state)
+
+    def get_q_value(self, state, action):
+        return self.compute_q_value_from_values(state, action)
+
+    def compute_q_value_from_values(self, state, action):
         """
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
         V = 0
-        for nextState, nextprob in self.mdp.getTransitionStatesAndProbs(state, action):
-            V += nextprob * (self.mdp.getReward(state, action, nextState) + self.discount * self.getValue(nextState))
+        for nextState, next_prob in self.mdp.get_transition_states_and_prob(state, action):
+            V += next_prob * (self.mdp.get_reward(state, action, nextState) + self.discount * self.get_value(nextState))
         return V
-    def computeActionFromValues(self, state):
+
+    def compute_action_from_values(self, state):
         """
           The policy is the best action in the given state
           according to the values currently stored in self.values.
@@ -81,17 +84,7 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        allV = util.Counter()
-        for action in self.mdp.getPossibleActions(state):
-            allV[action]=self.computeQValueFromValues(state,action)
-        return allV.most_common(1)[0][0]
-
-    def getPolicy(self, state):
-        return self.computeActionFromValues(state)
-
-    def getAction(self, state):
-        "Returns the policy at the state (no exploration)."
-        return self.computeActionFromValues(state)
-
-    def getQValue(self, state, action):
-        return self.computeQValueFromValues(state, action)
+        all_value = util.Counter()
+        for action in self.mdp.get_possible_actions(state):
+            all_value[action] = self.compute_q_value_from_values(state, action)
+        return all_value.most_common(1)[0][0]

@@ -32,7 +32,7 @@ if __name__ == '__main__':
     print("---Transition probability and feature generation complete---")
     print('')
 
-    from irl.agent.VIAgent import ValueIterationAgent
+    from irl.agent.value_iteration_agent import ValueIterationAgent
     print('')
     a = ValueIterationAgent(mdp, discount, iter_num)
 

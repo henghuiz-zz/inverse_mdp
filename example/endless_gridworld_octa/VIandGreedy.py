@@ -24,7 +24,7 @@ def GenerateTranProbandFeature(gridSize,mdp,numState):
     return TransProb, Features, RewardsVector
 
 def FindVIDataSamples(iterNum,discount,mdp,numState):
-    import irl.agent.VIAgent as valueIterationAgents
+    import irl.agent.value_iteration_agent as valueIterationAgents
     a = valueIterationAgents.ValueIterationAgent(mdp, discount, iterNum)
 
     VIDataSample = np.zeros((numState, 2), dtype=int)

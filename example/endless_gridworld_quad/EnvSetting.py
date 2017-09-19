@@ -1,4 +1,4 @@
-from irl.environment.endlessgridworld import *
+from irl.environment.endless_grid_world import *
 import numpy as np
 
 
