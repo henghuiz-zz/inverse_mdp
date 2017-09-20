@@ -129,16 +129,16 @@ class EndlessGridWorld:
 
         if action == 0:  # go north
             prob_distribution = [
-                self.noise/3, self.noise/3, self.noise/3, 1- self.noise, 0]
+                self.noise/4, self.noise/4, self.noise/4, 1- self.noise, self.noise/4]
         if action == 1:  # go east
             prob_distribution = [
-                self.noise/3, 1-self.noise, 0, self.noise/3, self.noise/3]
+                self.noise/4, 1-self.noise, self.noise/4, self.noise/4, self.noise/4]
         if action == 2:  # go west
             prob_distribution = [
-                self.noise/3, 0, 1-self.noise, self.noise/3, self.noise/3]
+                self.noise/4, self.noise/4, 1-self.noise, self.noise/4, self.noise/4]
         if action == 3:  # go south
             prob_distribution = [
-                self.noise/3, self.noise/3, self.noise/3, 0, 1- self.noise]
+                self.noise/4, self.noise/4, self.noise/4, self.noise/4, 1- self.noise]
 
         for next_state, prob in zip(next_possible_state, prob_distribution):
             successors[next_state] += prob
