@@ -18,7 +18,7 @@ def GenerateTranProbandFeature(gridSize,mdp,numState):
                         toid = sub2ind(item[0])
                         TransProb[toid][fromid][u] = item[1]
 
-                    featureitem = mdp.getActorFeature((x, y, theta), controlName[u])
+                    featureitem = mdp.get_actor_feature((x, y, theta), controlName[u])
                     Features[fromid][u][:] = featureitem
 
     return TransProb, Features, RewardsVector

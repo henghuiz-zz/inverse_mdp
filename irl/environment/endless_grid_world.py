@@ -70,6 +70,14 @@ class EndlessGridWorld:
         ]
         return np.array(all_distances)
 
+    def get_actor_feature(self, state, action):
+        Fea = np.zeros(len(self.waypoint_policy))
+        for next_state, prob in self.get_transition_states_and_prob(state, action):
+            if prob is not None:
+                subFea = self.find_policy_features(next_state)
+                Fea += subFea * prob
+        return Fea
+
     def get_possible_actions(self, state):
         """
         Returns list of valid actions for 'state'.

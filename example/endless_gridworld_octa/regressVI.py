@@ -77,10 +77,10 @@ def oneRoundEvaluation(numState,FeaturesSample,ActionSample,Features,TransProb,R
         PossibleC = np.arange(10, 200, 4)
 
         thisTheta = IRL.logstic_regression_with_constrain(TrainFeaturesSample, TrainActionSample, CVFeaturesSample,
-                                                          CVActionSample, PossibleC, showInfo=False)
+                                                          CVActionSample, PossibleC, show_info=False)
         RewardCon[idNT] = CalculateRSPAverageReward(thisTheta, Features, TransProb, RewardsVector)
 
-        thisTheta = IRL.LogsticRegressionWithoutConstrain(TrainFeaturesSample, TrainActionSample, 10+(1.0*idNT/lenNT*(30-10)))
+        thisTheta = IRL.logstic_regression_without_constrain(TrainFeaturesSample, TrainActionSample, 10 + (1.0 * idNT / lenNT * (30 - 10)))
         RewardUnc[idNT] = CalculateRSPAverageReward(thisTheta, Features, TransProb, RewardsVector)
     return RewardCon, RewardUnc
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
             FeaturesSample[i][u][:] = featureitem
 
     # # Try unconstrained regression first
-    BestTheta = IRL.LogsticRegressionWithoutConstrain(FeaturesSample,ActionSample,20)
+    BestTheta = IRL.logstic_regression_without_constrain(FeaturesSample, ActionSample, 20)
     print(BestTheta)
     BestReward = CalculateRSPAverageReward(BestTheta,Features,TransProb,RewardsVector)
     print(BestReward)
