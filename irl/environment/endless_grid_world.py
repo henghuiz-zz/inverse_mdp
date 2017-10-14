@@ -24,7 +24,7 @@ def gaussian(distance, peak, std_deviation):
            (std_deviation * np.sqrt(2 * np.pi))
 
 
-def find_two_point_similarity(point_one, point_two, peak=10, std=1):
+def find_two_point_similarity(point_one, point_two, peak=10, std=3):
     """
     Find the similarity between two points using Gaussian function
 

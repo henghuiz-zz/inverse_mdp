@@ -57,5 +57,4 @@ cbar = fig.colorbar(cax, ticks=[0, 1, 2, 3])
 cbar.ax.tick_params(labelsize=16)
 
 plt.savefig('../../data/EndLessGridWorldQuad/reward_heatmap.pdf')
-
 plt.show()

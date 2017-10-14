@@ -105,9 +105,9 @@ for x in range(grid_size[0]):
             feature_item = grid_world_mdp.get_actor_feature((x, y), u)
             features[from_id][u][:] = feature_item
 
-# filename = '../../data/EndLessGridWorldQuad/sample_from_vi.mat'
-# scipy.io.savemat(filename, {"trans_prob": trans_prob,
-#                             "features": features,
-#                             "vi_data_sample": vi_data_sample,
-#                             "rewards_vector": rewards_vector,
-#                             "greedy_data_sample": greedy_data_sample})
+filename = '../../data/EndLessGridWorldQuad/sample_from_vi.mat'
+scipy.io.savemat(filename, {"trans_prob": trans_prob,
+                            "features": features,
+                            "vi_data_sample": vi_data_sample,
+                            "rewards_vector": rewards_vector,
+                            "greedy_data_sample": greedy_data_sample})

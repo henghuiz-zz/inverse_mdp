@@ -73,7 +73,7 @@ def logstic_regression_with_constrain(features_train, control_train, FeaturesCV,
     if show_info:
         print('')
 
-    thisTheta = np.ones((2 * numFea, 1))
+    thisTheta = np.ones((2 * numFea, 1)) / numFea / 2
     for i in range(len(PossibleC)):
         C = PossibleC[i]
         TrainObjectFun = lambda theta: negative_log_likelihood(theta, features_train, control_train)
@@ -103,7 +103,7 @@ def logstic_regression_with_constrain(features_train, control_train, FeaturesCV,
     return bestTheta
 
 
-def logstic_regression_without_constrain(features_train, control_train, FeaturesCV, ControlCV, PossibleC, show_info=True):
+def logstic_regression_without_constrain(features_train, control_train, PossibleC, show_info=True):
     num_fea = features_train.shape[2]
     G = np.zeros((2 * num_fea, num_fea))
     h = np.zeros(2 * num_fea)
@@ -115,29 +115,36 @@ def logstic_regression_without_constrain(features_train, control_train, Features
         h[i + num_fea] = -1
 
 
-    bestTheta = None
-    bestNLL = None
+    # bestTheta = None
+    # bestNLL = None
 
-    for C in PossibleC:
-        cons = ({'type': 'ineq', 'fun': lambda x: (np.dot(G, x) - C * h)})
-        TrainObjectFun = lambda theta: negative_log_likelihood(theta, features_train, control_train)
-        TrainObjectFunGrad = lambda theta: gradient_negative_log_likelihood_unc(theta, features_train, control_train)
-        thisTheta = minimize(TrainObjectFun, np.ones((num_fea, 1)), jac=TrainObjectFunGrad, constraints=cons, tol=1e-10)
-
-        CVObjectFun = lambda theta: negative_log_likelihood(theta, FeaturesCV, ControlCV)
-
-        thisTheta = np.array(thisTheta["x"])
-        thisNLL = CVObjectFun(thisTheta)
-
-        if bestTheta is None:
-            bestTheta = thisTheta[0:num_fea]
-            bestNLL = thisNLL
-            if show_info:
-                print("\r C=", C, "NLL=", bestNLL, end='', flush=True)
-        elif bestNLL > thisNLL:
-            bestTheta = thisTheta[0:num_fea]
-            bestNLL = thisNLL
-            if show_info:
-                print("\r C=", C, "NLL=", bestNLL, end='', flush=True)
+    C = 1000
+    cons = ({'type': 'ineq', 'fun': lambda x: (np.dot(G, x) - C * h)})
+    TrainObjectFun = lambda theta: negative_log_likelihood(theta, features_train, control_train)
+    TrainObjectFunGrad = lambda theta: gradient_negative_log_likelihood_unc(theta, features_train, control_train)
+    thisTheta = minimize(TrainObjectFun, np.ones((num_fea, 1))/num_fea, jac=TrainObjectFunGrad, constraints=cons, tol=1e-10)
+    thisTheta = np.array(thisTheta["x"])
+    bestTheta = thisTheta[0:num_fea]
+    # for C in PossibleC:
+    #     cons = ({'type': 'ineq', 'fun': lambda x: (np.dot(G, x) - C * h)})
+    #     TrainObjectFun = lambda theta: negative_log_likelihood(theta, features_train, control_train)
+    #     TrainObjectFunGrad = lambda theta: gradient_negative_log_likelihood_unc(theta, features_train, control_train)
+    #     thisTheta = minimize(TrainObjectFun, np.ones((num_fea, 1)), jac=TrainObjectFunGrad, constraints=cons, tol=1e-10)
+    #
+    #     CVObjectFun = lambda theta: negative_log_likelihood(theta, FeaturesCV, ControlCV)
+    #
+    #     thisTheta = np.array(thisTheta["x"])
+    #     thisNLL = CVObjectFun(thisTheta)
+    #
+    #     if bestTheta is None:
+    #         bestTheta = thisTheta[0:num_fea]
+    #         bestNLL = thisNLL
+    #         if show_info:
+    #             print("\r C=", C, "NLL=", bestNLL, end='', flush=True)
+    #     elif bestNLL > thisNLL:
+    #         bestTheta = thisTheta[0:num_fea]
+    #         bestNLL = thisNLL
+    #         if show_info:
+    #             print("\r C=", C, "NLL=", bestNLL, end='', flush=True)
 
     return bestTheta

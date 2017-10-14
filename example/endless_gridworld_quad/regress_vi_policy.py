@@ -4,7 +4,6 @@ import time
 import pickle
 import argparse
 
-
 sys.path.append('../../')
 import scipy.io
 import irl as IRL
@@ -14,48 +13,48 @@ np.set_printoptions(precision=2, suppress=True)
 from numpy.matlib import repmat
 
 
-def calculate_rsp_average_reward(theta, Features, TransProb, RewardsVector):
+def calculate_rsp_average_reward(theta, features, trans_prob, rewards_vector):
     # Calculate the probability that agent take action
-    numState = TransProb.shape[0]
-    numAction = TransProb.shape[2]
-    StateActionProb = np.dot(Features, theta)
-    StateActionProb = np.exp(StateActionProb)
-    sumStateActionProb = np.sum(StateActionProb, 1, keepdims=True)
-    StateActionProb = StateActionProb / repmat(sumStateActionProb, 1, numAction)
+    num_state = trans_prob.shape[0]
+    num_action = trans_prob.shape[2]
+    state_action_prob = np.dot(features, theta)
+    state_action_prob = np.exp(state_action_prob)
+    sum_state_action_prob = np.sum(state_action_prob, 1, keepdims=True)
+    state_action_prob = state_action_prob / repmat(sum_state_action_prob, 1, num_action)
 
-    TransProbUnderTheta = np.zeros((numState, numState))
-    for x in range(numState):
-        for y in range(numState):
-            TransProbUnderTheta[x][y] += np.dot(TransProb[x, y, :], StateActionProb[y, :])
+    trans_prob_under_theta = np.zeros((num_state, num_state))
+    for x in range(num_state):
+        for y in range(num_state):
+            trans_prob_under_theta[x][y] += np.dot(trans_prob[x, y, :], state_action_prob[y, :])
 
-    vecs = np.ones((numState, 1))
-    vecs /= numState
+    vecs = np.ones((num_state, 1))
+    vecs /= num_state
     for i in range(1000):
-        vecs = np.matmul(TransProbUnderTheta, vecs)
+        vecs = np.matmul(trans_prob_under_theta, vecs)
 
     vecs /= np.sum(vecs)
-    allreward = np.dot(vecs.T, RewardsVector)
+    allreward = np.dot(vecs.T, rewards_vector)
     return allreward[0, 0]
 
 
-def calculate_average_reward(ActionDataSample, TransProb, RewardsVector):
+def calculate_average_reward(action_data_sample, trans_prob, rewards_vector):
     # Calculate the probability that agent take action
-    numState = TransProb.shape[0]
+    num_state = trans_prob.shape[0]
 
-    TranProbUnderAction = np.zeros((numState, numState))
-    for i in range(numState):
-        stateid = ActionDataSample[i, 0]
-        action = ActionDataSample[i, 1]
-        TranProbUnderAction[:, stateid] = TransProb[:, stateid, action]
+    tran_prob_under_action = np.zeros((num_state, num_state))
+    for i in range(num_state):
+        stateid = action_data_sample[i, 0]
+        action = action_data_sample[i, 1]
+        tran_prob_under_action[:, stateid] = trans_prob[:, stateid, action]
 
-    vecs = np.ones((numState, 1))
-    vecs /= numState
+    vecs = np.ones((num_state, 1))
+    vecs /= num_state
     for i in range(1000):
-        vecs = np.matmul(TranProbUnderAction, vecs)
+        vecs = np.matmul(tran_prob_under_action, vecs)
 
     vecs /= np.sum(vecs)
-    allreward = np.dot(vecs.T, RewardsVector)
-    return allreward[0, 0]
+    all_reward = np.dot(vecs.T, rewards_vector)
+    return all_reward[0, 0]
 
 
 if __name__ == '__main__':
@@ -154,8 +153,7 @@ if __name__ == '__main__':
 
             start_time = time.time()
             unc_theta = IRL.logstic_regression_without_constrain(
-                train_features_sample, train_action_sample,
-                validate_features_sample, validate_action_sample,
+                this_features_sample[0:num_train_all, :, :], this_action_sample[0:num_train_all],
                 possible_c, show_info=False)
             elapsed_time = time.time() - start_time
             unc_time[rate_id] += elapsed_time
@@ -183,4 +181,3 @@ if __name__ == '__main__':
     #
     # filename = '../../data/EndLessGridWorldQuad/regress_result' + str(save_id) + '.p'
     # pickle.dump(saver_dict, open(filename, 'wb'))
-
