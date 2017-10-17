@@ -58,13 +58,13 @@ def calculate_average_reward(action_data_sample, trans_prob, rewards_vector):
 
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(description='Process some integers.')
-    # parser.add_argument('save_id', type=int, nargs=1, default=0, help='an integer for the accumulator')
-    # args = parser.parse_args()
-    # save_id = args.save_id[0]
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--save_id', type=int, default=0, help='an integer for the accumulator')
+    args = parser.parse_args()
+    save_id = args.save_id
 
     # Prepare the enviromnent
-    loaded_data = scipy.io.loadmat('../../data/EndLessGridWorldQuad/sample_from_vi.mat')
+    loaded_data = scipy.io.loadmat('../../data/endless_grid_quad/sample_from_vi.mat')
     vi_data_sample = loaded_data['vi_data_sample']
     trans_prob = loaded_data["trans_prob"]
     features = loaded_data["features"]
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     print(greedy_reward)
 
     # TODO: change this back
-    possible_sample_ratio = np.arange(0.3, 1.0, 0.1)
+    possible_sample_ratio = np.arange(0.1, 1.0, 0.05)
     possible_c = range(1, 101, 5)
     num_rate = len(possible_sample_ratio)
     l1_reward_mean = np.zeros(num_rate)
@@ -172,12 +172,12 @@ if __name__ == '__main__':
     print(l1_reward_mean)
     print(unc_reward_mean)
 
-    # saver_dict = {'l1_reward': l1_reward, 'unc_reward': unc_reward,
-    #               'l1_time': l1_time / num_trial, 'unc_time': unc_time / num_trial,
-    #               'l1_theta_list': l1_theta_list, 'unc_theta_list':unc_theta_list,
-    #               'possible_sample_ratio': possible_sample_ratio,
-    #               'greedy_reward': greedy_reward, 'vi_reward': vi_reward
-    #               }
-    #
-    # filename = '../../data/EndLessGridWorldQuad/regress_result' + str(save_id) + '.p'
-    # pickle.dump(saver_dict, open(filename, 'wb'))
+    saver_dict = {'l1_reward': l1_reward, 'unc_reward': unc_reward,
+                  'l1_time': l1_time / num_trial, 'unc_time': unc_time / num_trial,
+                  'l1_theta_list': l1_theta_list, 'unc_theta_list':unc_theta_list,
+                  'possible_sample_ratio': possible_sample_ratio,
+                  'greedy_reward': greedy_reward, 'vi_reward': vi_reward
+                  }
+
+    filename = '../../data/endless_grid_quad/regress_result' + str(save_id) + '.p'
+    pickle.dump(saver_dict, open(filename, 'wb'))

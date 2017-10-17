@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import scipy.io
 import time
-
+import os
 
 sys.path.append('../..')
 from irl.environment.endless_grid_world import gaussian, EndlessGridWorld
@@ -105,7 +105,10 @@ for x in range(grid_size[0]):
             feature_item = grid_world_mdp.get_actor_feature((x, y), u)
             features[from_id][u][:] = feature_item
 
-filename = '../../data/EndLessGridWorldQuad/sample_from_vi.mat'
+if not os.path.isdir('../../data/endless_grid_quad/'):
+    os.makedirs('../../data/endless_grid_quad/')
+
+filename = '../../data/endless_grid_quad/sample_from_vi.mat'
 scipy.io.savemat(filename, {"trans_prob": trans_prob,
                             "features": features,
                             "vi_data_sample": vi_data_sample,
